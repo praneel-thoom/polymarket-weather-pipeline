@@ -1,0 +1,6 @@
+requests
+kafka-python
+pyspark==3.5.3
+dbt-core
+dbt-duckdb
+duckdb
