@@ -1,6 +1,0 @@
-ERROR miami: 401 Client Error: Unauthorized for url: https://api.tomorrow.io/v4/weather/forecast?location=25.7617%2C-80.1918&apikey=yourkey
-ERROR new_orleans: 401 Client Error: Unauthorized for url: https://api.tomorrow.io/v4/weather/forecast?location=29.9511%2C-90.0715&apikey=yourkey
-ERROR houston: 401 Client Error: Unauthorized for url: https://api.tomorrow.io/v4/weather/forecast?location=29.7604%2C-95.3698&apikey=yourkey
-ERROR miami: 401 Client Error: Unauthorized for url: https://api.tomorrow.io/v4/weather/forecast?location=25.7617%2C-80.1918&apikey=yourkey
-ERROR new_orleans: 401 Client Error: Unauthorized for url: https://api.tomorrow.io/v4/weather/forecast?location=29.9511%2C-90.0715&apikey=yourkey
-ERROR houston: 401 Client Error: Unauthorized for url: https://api.tomorrow.io/v4/weather/forecast?location=29.7604%2C-95.3698&apikey=yourkey

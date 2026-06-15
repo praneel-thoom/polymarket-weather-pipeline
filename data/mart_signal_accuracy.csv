@@ -1,3 +1,0 @@
-market_id,price_direction,move_count,avg_abs_change_pct,max_abs_change_pct,min_price_observed,max_price_observed
-cat5_hurricane_us_2026,UP,24,10.13,20.0,0.09,0.14
-cat5_hurricane_us_2026,DOWN,7,27.38,42.86,0.08,0.11
