@@ -57,14 +57,6 @@ Serve:
 - `mart_lead_lag`: 30-minute windowed join of market prices to weather conditions
 - `mart_signal_accuracy`: Distribution of significant price moves by direction and magnitude
 
-## Dashboard
-
-![Dashboard overview](docs/images/dashboard-overview.png)
-*Live odds vs. weather conditions across the three monitored Gulf Coast locations.*
-
-![Dashboard detail](docs/images/dashboard-detail.png)
-*Lead-lag view showing significant price moves against pressure anomaly.*
-
 ## Setup
 
 **Requirements:** Docker, Python 3.9+, Java 17+, AWS account
