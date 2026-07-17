@@ -2,4 +2,5 @@ streamlit
 plotly
 pandas
 numpy
+duckdb
 boto3

@@ -3,52 +3,47 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import numpy as np
-import json
+import duckdb
 import os
-import boto3
-from io import StringIO
 
 st.set_page_config(page_title="Hurricane Market Signal Pipeline", layout="wide")
 st.title("Hurricane Prediction Market vs Weather Signal Dashboard")
 st.caption("Polymarket Cat 5 Hurricane US Landfall odds vs atmospheric pressure")
 
+def get_db():
+    con = duckdb.connect()
+    con.execute("INSTALL httpfs; LOAD httpfs;")
+    aws_key = st.secrets.get("AWS_ACCESS_KEY", os.environ.get("AWS_ACCESS_KEY", ""))
+    aws_secret = st.secrets.get("AWS_SECRET_KEY", os.environ.get("AWS_SECRET_KEY", ""))
+    aws_region = st.secrets.get("AWS_REGION", os.environ.get("AWS_REGION", "us-east-2"))
+    bucket = st.secrets.get("AWS_BUCKET", os.environ.get("AWS_BUCKET", "polymarket-weather-pipeline"))
+    con.execute(f"""
+        SET s3_access_key_id='{aws_key}';
+        SET s3_secret_access_key='{aws_secret}';
+        SET s3_region='{aws_region}';
+    """)
+    return con, bucket
+
 @st.cache_data(ttl=30)
-def load_from_s3():
-    s3 = boto3.client(
-        "s3",
-        aws_access_key_id=st.secrets["AWS_ACCESS_KEY"],
-        aws_secret_access_key=st.secrets["AWS_SECRET_KEY"],
-        region_name=st.secrets["AWS_REGION"]
-    )
-    bucket = st.secrets["AWS_BUCKET"]
+def load_data():
+    con, bucket = get_db()
+    poly_df = con.execute(f"""
+        SELECT event_time as ts, market_id, yes_price, price_change_pct, price_direction
+        FROM read_parquet('s3://{bucket}/silver/polymarket_events/**/*.parquet', union_by_name=true)
+        ORDER BY ts
+    """).df()
+    poly_df["ts"] = pd.to_datetime(poly_df["ts"], utc=True)
 
-    poly_records = []
-    obj = s3.get_object(Bucket=bucket, Key="backfill/polymarket.jsonl")
-    for line in obj["Body"].read().decode("utf-8").splitlines():
-        try:
-            poly_records.append(json.loads(line))
-        except:
-            pass
-
-    weather_records = []
-    obj = s3.get_object(Bucket=bucket, Key="backfill/weather.jsonl")
-    for line in obj["Body"].read().decode("utf-8").splitlines():
-        try:
-            weather_records.append(json.loads(line))
-        except:
-            pass
-
-    poly_df = pd.DataFrame(poly_records)
-    poly_df["ts"] = pd.to_datetime(poly_df["ts"], format="mixed", utc=True)
-    poly_df = poly_df.drop_duplicates(subset=["ts"]).sort_values("ts")
-
-    weather_df = pd.DataFrame(weather_records)
-    weather_df["ts"] = pd.to_datetime(weather_df["ts"], format="mixed", utc=True)
-    weather_df = weather_df.drop_duplicates(subset=["ts", "location_id"]).sort_values("ts")
-
+    weather_df = con.execute(f"""
+        SELECT event_time as ts, location_id, pressureSeaLevel, windSpeed, humidity, temperature
+        FROM read_parquet('s3://{bucket}/silver/weather_forecasts/**/*.parquet', union_by_name=true)
+        ORDER BY ts
+    """).df()
+    weather_df["ts"] = pd.to_datetime(weather_df["ts"], utc=True)
+    con.close()
     return poly_df, weather_df
 
-poly_df, weather_df = load_from_s3()
+poly_df, weather_df = load_data()
 
 location = st.selectbox("Select Location", ["miami", "houston", "new_orleans"], index=0,
                         format_func=lambda x: x.replace("_", " ").title())
@@ -135,4 +130,3 @@ st.plotly_chart(scatter_fig, use_container_width=True)
 if st.button("Refresh Now"):
     st.cache_data.clear()
     st.rerun()
-
