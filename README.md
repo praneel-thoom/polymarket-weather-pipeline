@@ -14,7 +14,7 @@ Do informed traders on Polymarket price in hurricane developments before or afte
 ```
 Sources:
   Polymarket CLOB API  ─┐
-  Tomorrow.io API       ─┴─> Kafka
+  Tomorrow.io API      ─┴─> Kafka
 
 Streaming:
   Kafka -> Spark Structured Streaming -> Delta Lake on AWS S3
