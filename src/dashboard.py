@@ -136,4 +136,3 @@ if st.button("Refresh Now"):
     st.cache_data.clear()
     st.rerun()
 
-st.caption("Data: Polymarket CLOB API + Tomorrow.io + Open-Meteo | Pipeline: Kafka → Spark → Delta Lake (AWS S3) → dbt")
