@@ -1,3 +1,4 @@
+import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, abs as spark_abs, round as spark_round, when, unix_timestamp, avg, count
 from pyspark.sql.window import Window
@@ -10,18 +11,17 @@ spark = SparkSession.builder \
             "com.amazonaws:aws-java-sdk-bundle:1.12.262") \
     .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
     .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
-    .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000") \
-    .config("spark.hadoop.fs.s3a.access.key", "minioadmin") \
-    .config("spark.hadoop.fs.s3a.secret.key", "minioadmin") \
-    .config("spark.hadoop.fs.s3a.path.style.access", "true") \
+    .config("spark.hadoop.fs.s3a.endpoint", f"s3.{os.environ['AWS_REGION']}.amazonaws.com") \
+    .config("spark.hadoop.fs.s3a.access.key", os.environ["AWS_ACCESS_KEY"]) \
+    .config("spark.hadoop.fs.s3a.secret.key", os.environ["AWS_SECRET_KEY"]) \
     .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
     .config("spark.hadoop.fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider") \
     .getOrCreate()
 
 spark.sparkContext.setLogLevel("WARN")
 
-poly_silver = spark.read.format("delta").load("s3a://polymarket-weather/silver/polymarket_events")
-weather_silver = spark.read.format("delta").load("s3a://polymarket-weather/silver/weather_forecasts")
+poly_silver = spark.read.format("delta").load(f"s3a://{os.environ['AWS_BUCKET']}/silver/polymarket_events")
+weather_silver = spark.read.format("delta").load(f"s3a://{os.environ['AWS_BUCKET']}/silver/weather_forecasts")
 
 significant_moves = poly_silver \
     .filter(spark_abs(col("price_change_pct")) > 5) \
@@ -32,7 +32,7 @@ significant_moves = poly_silver \
     ) \
     .orderBy("event_time")
 
-significant_moves.write.format("delta").mode("overwrite").save("s3a://polymarket-weather/gold/significant_moves")
+significant_moves.write.format("delta").mode("overwrite").save(f"s3a://{os.environ['AWS_BUCKET']}/gold/significant_moves")
 print(f"Significant price moves: {significant_moves.count()}")
 significant_moves.show(10)
 
@@ -62,7 +62,7 @@ market_weather = poly_agg.join(weather_agg, on="window_ts", how="inner") \
     .withColumn("avg_precip_prob", spark_round(col("avg_precip_prob"), 1)) \
     .orderBy("window_ts", "location_id")
 
-market_weather.write.format("delta").mode("overwrite").save("s3a://polymarket-weather/gold/market_weather_signals")
+market_weather.write.format("delta").mode("overwrite").save(f"s3a://{os.environ['AWS_BUCKET']}/gold/market_weather_signals")
 print(f"Market weather signal rows: {market_weather.count()}")
 market_weather.show(10)
 

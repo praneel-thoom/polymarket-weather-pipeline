@@ -1,3 +1,4 @@
+import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lag, round as spark_round, when
 from pyspark.sql.window import Window
@@ -10,17 +11,16 @@ spark = SparkSession.builder \
             "com.amazonaws:aws-java-sdk-bundle:1.12.262") \
     .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
     .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
-    .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000") \
-    .config("spark.hadoop.fs.s3a.access.key", "minioadmin") \
-    .config("spark.hadoop.fs.s3a.secret.key", "minioadmin") \
-    .config("spark.hadoop.fs.s3a.path.style.access", "true") \
+    .config("spark.hadoop.fs.s3a.endpoint", f"s3.{os.environ['AWS_REGION']}.amazonaws.com") \
+    .config("spark.hadoop.fs.s3a.access.key", os.environ["AWS_ACCESS_KEY"]) \
+    .config("spark.hadoop.fs.s3a.secret.key", os.environ["AWS_SECRET_KEY"]) \
     .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
     .config("spark.hadoop.fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider") \
     .getOrCreate()
 
 spark.sparkContext.setLogLevel("WARN")
 
-poly_bronze = spark.read.format("delta").load("s3a://polymarket-weather/bronze/polymarket_events")
+poly_bronze = spark.read.format("delta").load(f"s3a://{os.environ['AWS_BUCKET']}/bronze/polymarket_events")
 
 poly_window = Window.partitionBy("market_id").orderBy("event_time")
 
@@ -45,11 +45,11 @@ poly_silver = poly_bronze \
     ) \
     .dropna(subset=["prev_price"])
 
-poly_silver.write.format("delta").mode("overwrite").save("s3a://polymarket-weather/silver/polymarket_events")
+poly_silver.write.format("delta").mode("overwrite").save(f"s3a://{os.environ['AWS_BUCKET']}/silver/polymarket_events")
 print(f"Polymarket silver rows: {poly_silver.count()}")
 poly_silver.show(5)
 
-weather_bronze = spark.read.format("delta").load("s3a://polymarket-weather/bronze/weather_forecasts")
+weather_bronze = spark.read.format("delta").load(f"s3a://{os.environ['AWS_BUCKET']}/bronze/weather_forecasts")
 
 weather_silver = weather_bronze \
     .withColumn("wind_severity",
@@ -69,7 +69,7 @@ weather_silver = weather_bronze \
         "temperature", "weatherCode", "wind_severity"
     )
 
-weather_silver.write.format("delta").mode("overwrite").save("s3a://polymarket-weather/silver/weather_forecasts")
+weather_silver.write.format("delta").mode("overwrite").save(f"s3a://{os.environ['AWS_BUCKET']}/silver/weather_forecasts")
 print(f"Weather silver rows: {weather_silver.count()}")
 weather_silver.show(5)
 
