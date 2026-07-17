@@ -2,6 +2,9 @@
 
 Real-time streaming pipeline analyzing whether Polymarket prediction markets lead or lag weather forecast updates on hurricane events. Live dashboard at [thoom-polymarket-weather.streamlit.app](https://thoom-polymarket-weather.streamlit.app).
 
+<img width="1613" height="782" alt="image" src="https://github.com/user-attachments/assets/c584e832-c60b-4c7d-86cc-6b80607935f6" />
+<img width="1625" height="554" alt="image" src="https://github.com/user-attachments/assets/60d2f2f8-0135-4407-8477-9482ee31fd30" />
+
 ## Analytical Question
 
 Do informed traders on Polymarket price in hurricane developments before or after official forecast agencies publish updates?
@@ -9,20 +12,18 @@ Do informed traders on Polymarket price in hurricane developments before or afte
 ## Architecture
 
 ```
-Polymarket CLOB API ──┐
-                       ├──> Kafka ──> Spark Structured Streaming ──> Delta Lake on AWS S3
-Tomorrow.io API ───────┘                                                    │
-                                                                             ▼
-                                                          Silver Transforms (PySpark)
-                                                                             │
-                                                                             ▼
-                                                          Gold Aggregations (PySpark)
-                                                                             │
-                                                                             ▼
-                                                                  dbt (DuckDB)
-                                                                             │
-                                                                             ▼
-                                                              Streamlit Dashboard
+Sources:
+  Polymarket CLOB API  ─┐
+  Tomorrow.io API       ─┴─> Kafka
+
+Streaming:
+  Kafka -> Spark Structured Streaming -> Delta Lake on AWS S3
+
+Transform:
+  Delta Lake -> Silver Transforms (PySpark) -> Gold Aggregations (PySpark) -> dbt (DuckDB)
+
+Serve:
+  dbt (DuckDB) -> Streamlit Dashboard
 ```
 
 ## Stack
@@ -56,9 +57,13 @@ Tomorrow.io API ───────┘                                        
 - `mart_lead_lag` — 30-minute windowed join of market prices to weather conditions
 - `mart_signal_accuracy` — Distribution of significant price moves by direction and magnitude
 
-## Key Finding
+## Dashboard
 
-During the June 14-15, 2026 Atlantic storm development period, hurricane market odds rose from ~11% to ~20% concurrent with pressure drops across all three Gulf Coast monitoring stations, consistent with informed traders pricing in storm activity ahead of or simultaneous with official forecast updates. Atmospheric pressure showed the strongest weather correlation with market pricing (r = 0.16) across the full May 23 to July 17 observation window.
+![Dashboard overview](docs/images/dashboard-overview.png)
+*Live odds vs. weather conditions across the three monitored Gulf Coast locations.*
+
+![Dashboard detail](docs/images/dashboard-detail.png)
+*Lead-lag view showing significant price moves against pressure anomaly.*
 
 ## Setup
 
@@ -108,3 +113,8 @@ weather_markets/
 
 docker-compose.yml            Kafka, Zookeeper, MinIO
 ```
+
+## Author
+
+Praneel Thoom
+[GitHub](https://github.com/praneel-thoom) · [pthoom6@gatech.edu](mailto:pthoom6@gatech.edu)
