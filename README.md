@@ -37,25 +37,25 @@ Serve:
 
 ## Data Sources
 
-**Polymarket** — Live prediction market odds on Cat 5 hurricane US landfall via the CLOB API, polled every 30 seconds.
+**Polymarket** : Live prediction market odds on Cat 5 hurricane US landfall via the CLOB API, polled every 30 seconds.
 
-**Tomorrow.io** — Minutely weather forecasts for Miami, New Orleans, and Houston, polled every 5 minutes. Fields include wind speed, pressure, humidity, and precipitation probability.
+**Tomorrow.io** : Minutely weather forecasts for Miami, New Orleans, and Houston, polled every 5 minutes. Fields include wind speed, pressure, humidity, and precipitation probability.
 
-**Open-Meteo** — Historical hourly weather archive used to backfill May 23 to present across all three locations.
+**Open-Meteo** : Historical hourly weather archive used to backfill May 23 to present across all three locations.
 
 ## Pipeline Layers
 
-**Bronze** — Raw events from Kafka written to Delta Lake on S3 as-is. One table per source.
+**Bronze** : Raw events from Kafka written to Delta Lake on S3 as-is. One table per source.
 
-**Silver** — Cleaned and enriched. Polymarket silver adds price change, percent change, and direction. Weather silver adds wind severity classification and pressure anomaly vs standard atmosphere (1013.25 hPa).
+**Silver** : Cleaned and enriched. Polymarket silver adds price change, percent change, and direction. Weather silver adds wind severity classification and pressure anomaly vs standard atmosphere (1013.25 hPa).
 
-**Gold** — Aggregated to 30-minute windows. Significant price moves (>5% change) isolated. Market odds joined to weather conditions by time window across 3 Gulf Coast locations.
+**Gold** : Aggregated to 30-minute windows. Significant price moves (>5% change) isolated. Market odds joined to weather conditions by time window across 3 Gulf Coast locations.
 
 **dbt models:**
-- `stg_polymarket_events` — Staging view over silver parquet on S3
-- `stg_weather_forecasts` — Staging view over silver parquet on S3
-- `mart_lead_lag` — 30-minute windowed join of market prices to weather conditions
-- `mart_signal_accuracy` — Distribution of significant price moves by direction and magnitude
+- `stg_polymarket_events` : Staging view over silver parquet on S3
+- `stg_weather_forecasts` : Staging view over silver parquet on S3
+- `mart_lead_lag` : 30-minute windowed join of market prices to weather conditions
+- `mart_signal_accuracy` : Distribution of significant price moves by direction and magnitude
 
 ## Dashboard
 
