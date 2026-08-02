@@ -71,13 +71,13 @@ weather_df = weather_raw \
 polymarket_query = polymarket_df.writeStream \
     .format("delta") \
     .outputMode("append") \
-    .option("checkpointLocation", "/tmp/checkpoints/polymarket_bronze") \
+    .option("checkpointLocation", f"s3a://{os.environ['AWS_BUCKET']}/checkpoints/bronze_polymarket_events") \
     .start(f"s3a://{os.environ['AWS_BUCKET']}/bronze/polymarket_events")
 
 weather_query = weather_df.writeStream \
     .format("delta") \
     .outputMode("append") \
-    .option("checkpointLocation", "/tmp/checkpoints/weather_bronze") \
+    .option("checkpointLocation", f"s3a://{os.environ['AWS_BUCKET']}/checkpoints/bronze_weather_forecasts") \
     .start(f"s3a://{os.environ['AWS_BUCKET']}/bronze/weather_forecasts")
 
 print("Spark streaming started. Writing to AWS S3...")
