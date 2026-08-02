@@ -4,3 +4,5 @@ pandas
 numpy
 duckdb
 boto3
+pyspark==3.5.3
+kafka-python
