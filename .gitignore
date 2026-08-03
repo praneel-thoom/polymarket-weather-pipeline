@@ -7,3 +7,4 @@ weather_markets/target/
 weather_markets/dbt_packages/
 weather_markets/logs/
 .streamlit/secrets.toml
+venv/
