@@ -10,6 +10,11 @@ st.set_page_config(page_title="Hurricane Market Signal Pipeline", layout="wide")
 st.title("Hurricane Prediction Market vs Weather Signal Dashboard")
 st.caption("Polymarket Cat 5 Hurricane US Landfall odds vs atmospheric pressure")
 
+# Only show data from when the pipeline was actually deployed as a stable,
+# continuously-running streaming service, not the manually-backfilled history
+# or the July 17 - Aug 2 gap when the old process had silently died.
+LIVE_STREAM_START = pd.Timestamp("2026-08-02 04:45:00", tz="UTC")
+
 def get_db():
     con = duckdb.connect()
     con.execute("INSTALL httpfs; LOAD httpfs;")
@@ -29,17 +34,21 @@ def load_data():
     con, bucket = get_db()
     poly_df = con.execute(f"""
         SELECT event_time as ts, market_id, yes_price, price_change_pct, price_direction
-        FROM read_parquet('s3://{bucket}/silver/polymarket_events/**/*.parquet', union_by_name=true)
+        FROM read_parquet('s3://{bucket}/silver/polymarket_events/*.parquet', union_by_name=true)
         ORDER BY ts
     """).df()
     poly_df["ts"] = pd.to_datetime(poly_df["ts"], utc=True)
+    poly_df = poly_df.dropna(subset=["ts"])
+    poly_df = poly_df[poly_df["ts"] >= LIVE_STREAM_START]
 
     weather_df = con.execute(f"""
         SELECT event_time as ts, location_id, pressureSeaLevel, windSpeed, humidity, temperature
-        FROM read_parquet('s3://{bucket}/silver/weather_forecasts/**/*.parquet', union_by_name=true)
+        FROM read_parquet('s3://{bucket}/silver/weather_forecasts/*.parquet', union_by_name=true)
         ORDER BY ts
     """).df()
     weather_df["ts"] = pd.to_datetime(weather_df["ts"], utc=True)
+    weather_df = weather_df.dropna(subset=["ts"])
+    weather_df = weather_df[weather_df["ts"] >= LIVE_STREAM_START]
     con.close()
     return poly_df, weather_df
 
