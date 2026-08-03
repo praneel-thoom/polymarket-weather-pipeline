@@ -17,10 +17,14 @@ producer = KafkaProducer(
 )
 
 def fetch_price(token_id):
-    url = f"https://clob.polymarket.com/price?token_id={token_id}&side=buy"
+    url = f"https://clob.polymarket.com/midpoint?token_id={token_id}"
     response = requests.get(url, timeout=10)
     response.raise_for_status()
-    return float(response.json()["price"])
+    data = response.json()
+    mid = data.get("mid_price", data.get("mid"))
+    if mid is None:
+        raise RuntimeError(f"Unexpected /midpoint response shape: {data}")
+    return float(mid)
 
 def poll():
     while True:
