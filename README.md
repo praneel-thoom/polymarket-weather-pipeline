@@ -4,9 +4,6 @@ Streaming pipeline analyzing whether Polymarket prediction markets lead or lag w
 
 [thoom-polymarket-weather.streamlit.app](https://thoom-polymarket-weather.streamlit.app), live AWS streaming paused.
 
-<img width="1613" height="782" alt="image" src="https://github.com/user-attachments/assets/c584e832-c60b-4c7d-86cc-6b80607935f6" />
-<img width="1625" height="554" alt="image" src="https://github.com/user-attachments/assets/60d2f2f8-0135-4407-8477-9482ee31fd30" />
-
 ## Analytical Question
 
 Do informed traders on Polymarket price in hurricane developments before or after official forecast agencies publish updates?
