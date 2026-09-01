@@ -6,4 +6,4 @@ select
     price_change,
     price_change_pct,
     price_direction
-from read_parquet('s3://polymarket-weather/silver/polymarket_events/**/*.parquet')
+from read_parquet('../data/silver/polymarket_events/**/*.parquet')

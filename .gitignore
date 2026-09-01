@@ -1,4 +1,8 @@
-data/
+data/bronze/
+data/gold/
+_delta_log/
+.*.crc
+data/backfill_*.jsonl
 logs/
 __pycache__/
 *.pyc

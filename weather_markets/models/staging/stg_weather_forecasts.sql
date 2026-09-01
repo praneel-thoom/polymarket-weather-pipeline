@@ -10,4 +10,4 @@ select
     precipitationProbability as precip_probability,
     temperature,
     wind_severity
-from read_parquet('s3://polymarket-weather/silver/weather_forecasts/**/*.parquet')
+from read_parquet('../data/silver/weather_forecasts/**/*.parquet')
