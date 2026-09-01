@@ -1,8 +1,6 @@
 # Polymarket Weather Pipeline
 
-Streaming pipeline analyzing whether Polymarket prediction markets lead or lag weather forecast updates on hurricane events. Dashboard serving a **May 23 – Aug 17 2026 snapshot** at 
-
-[thoom-polymarket-weather.streamlit.app](https://thoom-polymarket-weather.streamlit.app), live AWS streaming paused.
+Streaming pipeline analyzing whether Polymarket prediction markets lead or lag weather forecast updates on hurricane events. Dashboard serving a **May 23 – Aug 17 2026 snapshot** at [thoom-polymarket-weather.streamlit.app](https://thoom-polymarket-weather.streamlit.app), live AWS streaming paused.
 
 ## Analytical Question
 
