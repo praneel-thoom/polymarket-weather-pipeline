@@ -1,7 +1,5 @@
 # Polymarket Weather Pipeline
 
-> *Do prediction markets see the storm coming before the forecast does?*
-
 A streaming data pipeline that tests whether Polymarket odds on hurricane landfall lead or lag weather forecast updates. Live data flows from the Polymarket and Tomorrow.io APIs through Kafka and Spark Structured Streaming into a Delta Lake medallion on S3, is modeled with dbt and DuckDB, and is served through a Streamlit dashboard.
 
 **[View Live Dashboard](https://thoom-polymarket-weather.streamlit.app)** · Serving a **May 23 to Aug 17 2026 snapshot**. Live AWS streaming is paused.
